@@ -51,18 +51,20 @@
 
     <!-- Navigation -->
     <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4">
+        <div class="max-w-7xl mx-auto">
             <div class="flex flex-col sm:flex-row justify-between items-center sm:h-16 py-3 sm:py-0">
-                <div class="flex items-center mb-3 sm:mb-0">
+                <div class="flex items-center mb-3 sm:mb-0 px-4">
                     <span class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">ARDUINO <span class="text-teal-600">PLAY</span></span>
                 </div>
-                <!-- Mobile-friendly scrollable nav -->
-                <div class="flex overflow-x-auto no-scrollbar w-full sm:w-auto space-x-2 sm:space-x-6 pb-2 sm:pb-0 items-center justify-start sm:justify-end">
-                    <button onclick="navTo('dashboard')" class="nav-btn nav-active whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors" data-target="dashboard">Dashboard</button>
-                    <button onclick="navTo('timeline')" class="nav-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors" data-target="timeline">Timeline</button>
-                    <button onclick="navTo('rounds')" class="nav-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors" data-target="rounds">Challenge</button>
-                    <button onclick="navTo('registration')" class="nav-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors" data-target="registration">Register</button>
-                    <button onclick="navTo('logistics')" class="nav-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors" data-target="logistics">Logistics</button>
+                <!-- Mobile-friendly scrollable nav with improved visibility -->
+                <div class="flex overflow-x-auto no-scrollbar w-full sm:w-auto space-x-2 sm:space-x-6 pb-2 sm:pb-0 px-4 sm:px-8 items-center justify-start sm:justify-end">
+                    <button onclick="navTo('dashboard')" class="nav-btn nav-active whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors flex-shrink-0" data-target="dashboard">Dashboard</button>
+                    <button onclick="navTo('timeline')" class="nav-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors flex-shrink-0" data-target="timeline">Timeline</button>
+                    <button onclick="navTo('rounds')" class="nav-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors flex-shrink-0" data-target="rounds">Challenge</button>
+                    <button onclick="navTo('registration')" class="nav-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors flex-shrink-0" data-target="registration">Register</button>
+                    <button onclick="navTo('logistics')" class="nav-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors flex-shrink-0" data-target="logistics">Logistics</button>
+                    <!-- Extra spacer for mobile scroll -->
+                    <div class="sm:hidden flex-shrink-0 w-4"></div>
                 </div>
             </div>
         </div>
@@ -226,11 +228,11 @@
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <!-- Tab bar with overflow scroll on mobile -->
-                <div class="flex overflow-x-auto no-scrollbar border-b border-slate-200 bg-slate-50/50">
-                    <button class="flex-1 min-w-[120px] py-4 text-center text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition-colors border-b-2 border-transparent focus:outline-none" onclick="switchRound('r1', this)">Quiz</button>
-                    <button class="flex-1 min-w-[120px] py-4 text-center text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition-colors border-b-2 border-transparent focus:outline-none" onclick="switchRound('r2', this)">Riddle</button>
-                    <button class="flex-1 min-w-[120px] py-4 text-center text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition-colors border-b-2 border-transparent focus:outline-none" onclick="switchRound('r3', this)">Echo</button>
+                <!-- Tab bar with fixed shrink behavior and spacing for mobile -->
+                <div class="flex overflow-x-auto no-scrollbar border-b border-slate-200 bg-slate-50/50 px-2 sm:px-0">
+                    <button class="flex-1 min-w-[100px] sm:min-w-[120px] py-4 text-center text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition-colors border-b-2 border-transparent focus:outline-none flex-shrink-0" onclick="switchRound('r1', this)">Quiz</button>
+                    <button class="flex-1 min-w-[100px] sm:min-w-[120px] py-4 text-center text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition-colors border-b-2 border-transparent focus:outline-none flex-shrink-0" onclick="switchRound('r2', this)">Riddle</button>
+                    <button class="flex-1 min-w-[100px] sm:min-w-[120px] py-4 text-center text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition-colors border-b-2 border-transparent focus:outline-none flex-shrink-0" onclick="switchRound('r3', this)">Echo</button>
                 </div>
 
                 <!-- R1 Content -->
