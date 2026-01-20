@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARDUINO PLAY: Event Hub | VCET Madurai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin: 0 auto; height: 300px; }
+        .interactive-card { transition: all 0.3s ease; }
+        .interactive-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .timeline-line { position: absolute; left: 50%; transform: translateX(-50%); width: 2px; height: 100%; background-color: #e2e8f0; z-index: 0; }
+        .nav-active { border-bottom: 2px solid #0d9488; color: #0f766e; }
+        .hidden-content { display: none; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .checklist-scroll::-webkit-scrollbar { width: 6px; }
+        .checklist-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .checklist-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .form-container { position: relative; width: 100%; padding-top: 150%; } /* Mobile friendly height ratio */
+        @media (min-width: 768px) { .form-container { padding-top: 100%; } }
+        .form-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+    </style>
+    <!-- Chosen Palette: Warm Tech Neutral (Slate, Teal, Amber) -->
+    <!-- Application Structure Plan: 
+         1. Hero Dashboard: Immediate context + Organizer branding (VCET/IETE/ECE).
+         2. Interactive Roadmap: Vertical timeline for event flow.
+         3. The Arena (Rounds): Tabbed interface for deep dives.
+         4. Registration: NEW Section for embedded Google Form.
+         5. Logistics Hub: Checklist and Hardware requirements.
+         6. Scoring Viz: Chart.js for evaluation criteria.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Timeline: HTML/Flexbox vertical layout.
+         2. Round Logic Simulators: JS-driven DOM manipulation.
+         3. Scoring Chart: Chart.js Doughnut (maintainAspectRatio: false for responsive control).
+         4. Registration: Responsive iframe container for Google Forms.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-slate-800 tracking-tight">ARDUINO <span class="text-teal-600">PLAY</span></span>
+                </div>
+                <div class="hidden sm:flex space-x-6 items-center">
+                    <button onclick="navTo('dashboard')" class="nav-btn nav-active px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors" data-target="dashboard">Dashboard</button>
+                    <button onclick="navTo('timeline')" class="nav-btn px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors" data-target="timeline">Timeline</button>
+                    <button onclick="navTo('rounds')" class="nav-btn px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors" data-target="rounds">Challenge</button>
+                    <button onclick="navTo('registration')" class="nav-btn px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors" data-target="registration">Register</button>
+                    <button onclick="navTo('logistics')" class="nav-btn px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 transition-colors" data-target="logistics">Logistics</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- SECTION: DASHBOARD (HERO) -->
+        <section id="dashboard" class="fade-in space-y-8">
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-100">
+                <div class="p-8 md:p-12 text-center md:text-left flex flex-col md:flex-row items-center justify-between bg-gradient-to-r from-slate-900 to-slate-800 text-white">
+                    <div class="space-y-4 max-w-2xl">
+                        <div class="inline-flex flex-wrap gap-2">
+                            <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-semibold tracking-wide uppercase border border-teal-500/30">VCET Madurai</span>
+                            <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold tracking-wide uppercase border border-blue-500/30">IETE Forum</span>
+                            <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold tracking-wide uppercase border border-amber-500/30">ECE Dept</span>
+                        </div>
+                        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">Think. Build. Trigger.</h1>
+                        <p class="text-slate-300 text-lg leading-relaxed max-w-lg">
+                            An elite 100-minute sprint organized by the Department of Electronics and Communication Engineering, VCET Madurai.
+                        </p>
+                        <div class="flex flex-wrap gap-4 pt-2 justify-center md:justify-start">
+                            <div class="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm">
+                                <span class="text-2xl">📅</span>
+                                <span class="font-mono">Feb 5, 2026</span>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm">
+                                <span class="text-2xl">⏰</span>
+                                <span class="font-mono">11:00 AM</span>
+                            </div>
+                        </div>
+                        <button onclick="navTo('registration')" class="mt-4 bg-teal-600 hover:bg-teal-500 text-white px-8 py-3 rounded-xl font-bold transition-all transform hover:scale-105">
+                            Register Now
+                        </button>
+                    </div>
+                    
+                    <div class="mt-8 md:mt-0 bg-white/5 p-6 rounded-xl border border-white/10 backdrop-blur-md w-full md:w-auto min-w-[280px]">
+                        <h3 class="text-teal-400 font-bold uppercase text-sm mb-4 tracking-wider">Event Status</h3>
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div class="bg-slate-800/50 p-3 rounded-lg">
+                                <div class="text-3xl font-bold text-white mono">20</div>
+                                <div class="text-xs text-slate-400">Teams</div>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded-lg">
+                                <div class="text-3xl font-bold text-white mono">100</div>
+                                <div class="text-xs text-slate-400">Minutes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-4 font-bold text-xl">1</div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">The Quiz</h3>
+                    <p class="text-slate-600 text-sm">Rapid-fire MCQs on Arduino architecture and pin logic. All teams compete.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 mb-4 font-bold text-xl">2</div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">The Riddle</h3>
+                    <p class="text-slate-600 text-sm">Translate a poetic problem statement into a working circuit. Top 5 survive.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 mb-4 font-bold text-xl">3</div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">The Echo</h3>
+                    <p class="text-slate-600 text-sm">Sensor integration using Ultrasonic HC-SR04 for automation logic.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: TIMELINE -->
+        <section id="timeline" class="fade-in hidden-content space-y-6">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-slate-800">Event Timeline</h2>
+                <p class="text-slate-500 mt-2 max-w-2xl mx-auto">Hosted at Velammal College of Engineering and Technology (VCET), Madurai.</p>
+            </div>
+
+            <div class="relative max-w-4xl mx-auto py-10">
+                <div class="timeline-line"></div>
+                
+                <div class="relative flex items-center justify-between mb-8 interactive-card group">
+                    <div class="order-1 w-5/12 text-right pr-8">
+                        <h3 class="text-xl font-bold text-slate-800">Round 1: Quiz</h3>
+                        <p class="text-sm text-slate-500 mt-1">MCQ • All Teams</p>
+                    </div>
+                    <div class="z-20 flex items-center order-1 bg-blue-500 shadow-xl w-12 h-12 rounded-full justify-center text-white font-bold border-4 border-white group-hover:scale-110 transition-transform">
+                        20m
+                    </div>
+                    <div class="order-1 w-5/12 pl-8">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                            <span class="text-xs font-mono text-blue-600 font-bold">11:00 - 11:20 AM</span>
+                            <p class="text-sm text-slate-600 mt-2">Arduino fundamentals and pin mapping.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative flex items-center justify-center mb-8">
+                    <div class="z-10 bg-slate-200 text-slate-500 text-xs px-3 py-1 rounded-full border border-white">5m Transition</div>
+                </div>
+
+                <div class="relative flex items-center justify-between mb-8 interactive-card group">
+                    <div class="order-1 w-5/12 text-right pr-8">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                            <span class="text-xs font-mono text-amber-600 font-bold">11:25 - 12:00 PM</span>
+                            <p class="text-sm text-slate-600 mt-2">Logic build from riddles. LEDs + Motor.</p>
+                        </div>
+                    </div>
+                    <div class="z-20 flex items-center order-1 bg-amber-500 shadow-xl w-12 h-12 rounded-full justify-center text-white font-bold border-4 border-white group-hover:scale-110 transition-transform">
+                        35m
+                    </div>
+                    <div class="order-1 w-5/12 pl-8">
+                        <h3 class="text-xl font-bold text-slate-800">Round 2: Riddle</h3>
+                        <p class="text-sm text-slate-500 mt-1">Logic • Top 5 Advance</p>
+                    </div>
+                </div>
+
+                <div class="relative flex items-center justify-center mb-8">
+                    <div class="z-10 bg-slate-200 text-slate-500 text-xs px-3 py-1 rounded-full border border-white">5m Judging</div>
+                </div>
+
+                <div class="relative flex items-center justify-between mb-8 interactive-card group">
+                    <div class="order-1 w-5/12 text-right pr-8">
+                        <h3 class="text-xl font-bold text-slate-800">Round 3: Echo</h3>
+                        <p class="text-sm text-slate-500 mt-1">Finals • Top 3 Winners</p>
+                    </div>
+                    <div class="z-20 flex items-center order-1 bg-teal-600 shadow-xl w-12 h-12 rounded-full justify-center text-white font-bold border-4 border-white group-hover:scale-110 transition-transform">
+                        30m
+                    </div>
+                    <div class="order-1 w-5/12 pl-8">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                            <span class="text-xs font-mono text-teal-600 font-bold">12:05 - 12:35 PM</span>
+                            <p class="text-sm text-slate-600 mt-2">Sensor integration challenge.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative flex items-center justify-center">
+                    <div class="z-10 bg-slate-800 text-white text-xs px-4 py-2 rounded-lg shadow-lg font-bold">
+                        12:40 PM • RESULTS
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: THE ROUNDS -->
+        <section id="rounds" class="fade-in hidden-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800">The Arena</h2>
+                <p class="text-slate-500 mt-2">Detailed breakdown of the competitive stages.</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="flex border-b border-slate-200">
+                    <button class="flex-1 py-4 text-center font-medium text-slate-600 hover:bg-slate-50 transition-colors border-b-2 border-transparent hover:border-slate-300 focus:outline-none" onclick="switchRound('r1', this)">Round 1: Quiz</button>
+                    <button class="flex-1 py-4 text-center font-medium text-slate-600 hover:bg-slate-50 transition-colors border-b-2 border-transparent hover:border-slate-300 focus:outline-none" onclick="switchRound('r2', this)">Round 2: Riddle</button>
+                    <button class="flex-1 py-4 text-center font-medium text-slate-600 hover:bg-slate-50 transition-colors border-b-2 border-transparent hover:border-slate-300 focus:outline-none" onclick="switchRound('r3', this)">Round 3: Echo</button>
+                </div>
+
+                <div id="r1-content" class="p-8 round-content">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="md:w-1/2">
+                            <h3 class="text-2xl font-bold text-blue-600 mb-4">Mind over Microcontroller</h3>
+                            <p class="text-slate-600 mb-4">Focus on Arduino architecture, pin logic, and output prediction. Speed is the primary tie-breaker.</p>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                <p class="text-xs font-bold text-blue-800 uppercase mb-2">Sample Question</p>
+                                <p class="text-sm text-blue-900 font-mono">void setup() { pinMode(13, OUTPUT); }<br>void loop() { digitalWrite(13, HIGH); delay(1000); }</p>
+                                <p class="text-sm text-blue-800 mt-2 italic text-xs">What is the state of the pin 13 LED after 5 seconds?</p>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 bg-slate-50 rounded-xl p-6 flex flex-col items-center justify-center text-center">
+                            <div class="text-6xl mb-4">🧠</div>
+                            <h4 class="font-bold text-slate-800">Survival Rate</h4>
+                            <p class="text-slate-500 text-sm">100% of teams advance to the next stage.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="r2-content" class="p-8 round-content hidden-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold text-amber-600 mb-4">Riddle the Circuit</h3>
+                            <p class="text-slate-600 mb-4">Translate logic from a poetic description. No external sensors allowed.</p>
+                            <div class="bg-amber-50 p-4 rounded border-l-4 border-amber-500 italic text-amber-900 mb-4">
+                                "Three lights speak before motion begins. Only when the last light rests, the motor awakens."
+                            </div>
+                            <button onclick="solveRiddle()" class="w-full bg-slate-800 text-white py-2 rounded hover:bg-slate-700 transition-colors text-sm font-bold">
+                                Analyze Logic
+                            </button>
+                            <div id="riddle-solution" class="hidden-content space-y-2 mt-4">
+                                <div class="bg-slate-100 p-2 rounded text-xs">Step 1: LED 1-2-3 Blink Sequence</div>
+                                <div class="bg-teal-50 p-2 rounded text-xs font-bold">Step 2: Motor On</div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                            <h4 class="font-bold text-slate-800 mb-2">Survival Rate</h4>
+                            <div class="text-4xl font-bold text-amber-600">25%</div>
+                            <p class="text-sm text-slate-500 mt-1">Only Top 5 teams reach the finals.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="r3-content" class="p-8 round-content hidden-content">
+                    <div class="flex flex-col lg:flex-row gap-8">
+                        <div class="lg:w-1/2">
+                            <h3 class="text-2xl font-bold text-teal-600 mb-4">Echo Protocol</h3>
+                            <p class="text-slate-600 mb-6">Integrate the HC-SR04 for distance-based automation.</p>
+                            <div class="bg-slate-900 rounded-xl p-6 text-white">
+                                <label class="block text-xs text-slate-400 mb-2">Simulated Distance: <span id="dist-val" class="text-white font-mono">50</span> cm</label>
+                                <input type="range" min="0" max="100" value="50" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-teal-500" oninput="updateSensorSim(this.value)">
+                                <div class="grid grid-cols-2 gap-4 mt-4">
+                                    <div class="bg-slate-800 p-3 rounded text-center">
+                                        <div id="sim-state" class="font-bold text-green-400">SAFE</div>
+                                    </div>
+                                    <div class="bg-slate-800 p-3 rounded text-center">
+                                        <div id="sim-motor" class="font-bold text-white">RUNNING</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2">
+                            <div class="bg-white p-6 rounded-xl border border-slate-200">
+                                <h4 class="font-bold text-slate-800 mb-3">Scoring Weights</h4>
+                                <div class="chart-container">
+                                    <canvas id="scoringChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: REGISTRATION (NEW) -->
+        <section id="registration" class="fade-in hidden-content">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-slate-800">Registration Portal</h2>
+                <p class="text-slate-500 mt-2">Fill the form below to register your team. Limited to 20 spots.</p>
+            </div>
+            <div class="bg-white p-2 md:p-6 rounded-2xl shadow-lg border border-slate-100 max-w-4xl mx-auto">
+                <div class="form-container rounded-xl overflow-hidden bg-slate-50 border border-slate-200">
+                    <!-- Replace the placeholder URL with your actual Google Form URL -->
+                    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfD_placeholder_url_here/viewform?embedded=true">Loading form…</iframe>
+                </div>
+                <div class="mt-4 p-4 bg-blue-50 text-blue-800 rounded-lg text-sm text-center">
+                    Difficulty with the form? Contact the ECE Department office at VCET Madurai.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: LOGISTICS -->
+        <section id="logistics" class="fade-in hidden-content">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-100">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">Hardware Checklist</h2>
+                    <div class="space-y-3 checklist-scroll max-h-96 overflow-y-auto pr-2">
+                        <label class="flex items-center p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                            <input type="checkbox" class="w-5 h-5 text-teal-600 rounded">
+                            <span class="ml-3 text-slate-700">Arduino Board + Cable</span>
+                        </label>
+                        <label class="flex items-center p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                            <input type="checkbox" class="w-5 h-5 text-teal-600 rounded">
+                            <span class="ml-3 text-slate-700">Laptop with IDE Installed</span>
+                        </label>
+                        <label class="flex items-center p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                            <input type="checkbox" class="w-5 h-5 text-teal-600 rounded">
+                            <span class="ml-3 text-slate-700">3x LEDs (Any Color)</span>
+                        </label>
+                        <label class="flex items-center p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                            <input type="checkbox" class="w-5 h-5 text-teal-600 rounded">
+                            <span class="ml-3 text-slate-700">1x DC Motor + Driver</span>
+                        </label>
+                        <label class="flex items-center p-3 bg-amber-50 rounded-lg border border-amber-100 cursor-pointer">
+                            <input type="checkbox" class="w-5 h-5 text-amber-600 rounded">
+                            <span class="ml-3 text-amber-800 font-medium">Ultrasonic Sensor (HC-SR04)*</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-4">* Provided by VCET ECE Dept if your team doesn't have one.</p>
+                </div>
+
+                <div class="bg-slate-800 text-white p-8 rounded-xl shadow-lg flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-6">Venue & Organizers</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="bg-slate-700 p-2 rounded-lg mr-4">📍</div>
+                                <div>
+                                    <p class="font-bold">VCET Madurai</p>
+                                    <p class="text-xs text-slate-400">Velammal College of Engineering & Technology</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-slate-700 p-2 rounded-lg mr-4">📡</div>
+                                <div>
+                                    <p class="font-bold">IETE Forum</p>
+                                    <p class="text-xs text-slate-400">Student Chapter Collaboration</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-slate-700 p-2 rounded-lg mr-4">🔧</div>
+                                <div>
+                                    <p class="font-bold">ECE Department</p>
+                                    <p class="text-xs text-slate-400">Technical Coordination Team</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="window.print()" class="mt-8 bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded text-sm font-medium">
+                        Download Event Guide
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+            <div>
+                <p class="text-slate-800 font-bold text-sm">Department of ECE, VCET Madurai</p>
+                <p class="text-slate-500 text-xs">In association with IETE Forum</p>
+            </div>
+            <p class="text-slate-400 text-xs mt-4 md:mt-0 font-mono tracking-widest uppercase">Think • Build • Trigger</p>
+        </div>
+    </footer>
+
+    <script>
+        function navTo(targetId) {
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden-content'));
+            const target = document.getElementById(targetId);
+            target.classList.remove('hidden-content');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('nav-active', 'text-teal-600');
+                btn.classList.add('text-slate-600');
+                if (btn.dataset.target === targetId) {
+                    btn.classList.add('nav-active');
+                    btn.classList.remove('text-slate-600');
+                }
+            });
+
+            if (targetId === 'rounds' && window.scoreChart) window.scoreChart.resize();
+        }
+
+        function switchRound(roundId, btnElement) {
+            document.querySelectorAll('.round-content').forEach(el => el.classList.add('hidden-content'));
+            document.getElementById(roundId + '-content').classList.remove('hidden-content');
+            
+            const tabs = btnElement.parentElement.querySelectorAll('button');
+            tabs.forEach(t => t.classList.remove('text-teal-600', 'border-teal-600', 'bg-slate-50'));
+            btnElement.classList.add('text-teal-600', 'border-teal-600', 'bg-slate-50');
+
+            if (roundId === 'r3' && !window.chartRendered) {
+                renderChart();
+                window.chartRendered = true;
+            }
+        }
+
+        function solveRiddle() {
+            document.getElementById('riddle-solution').classList.remove('hidden-content');
+        }
+
+        function updateSensorSim(distance) {
+            document.getElementById('dist-val').innerText = distance;
+            const state = document.getElementById('sim-state');
+            const motor = document.getElementById('sim-motor');
+            
+            if (distance < 20) {
+                state.innerText = "WARNING";
+                state.className = "font-bold text-red-500 animate-pulse";
+                motor.innerText = "STOPPED";
+                motor.className = "font-bold text-slate-500";
+            } else {
+                state.innerText = "SAFE";
+                state.className = "font-bold text-green-400";
+                motor.innerText = "RUNNING";
+                motor.className = "font-bold text-white";
+            }
+        }
+
+        window.chartRendered = false;
+        window.scoreChart = null;
+
+        function renderChart() {
+            const ctx = document.getElementById('scoringChart').getContext('2d');
+            window.scoreChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Functionality', 'Efficiency', 'Speed'],
+                    datasets: [{
+                        data: [50, 30, 20],
+                        backgroundColor: ['#0d9488', '#f59e0b', '#3b82f6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstTab = document.querySelector('button[onclick*="switchRound"]');
+            if(firstTab) firstTab.classList.add('text-teal-600', 'border-teal-600', 'bg-slate-50');
+        });
+    </script>
+</body>
+</html>
